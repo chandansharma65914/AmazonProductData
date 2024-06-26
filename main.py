@@ -19,6 +19,10 @@ USER_AGENTS = [
     "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36 OPR/77.0.4054.90",
 ]
 
+@app.get("/")
+def read_root():
+    return {"message": "Welcome to the Amazon Product Data API"}
+
 @app.post("/api/product")
 async def get_product_details(data: ASINRequest):
     user_agent_index = 0  # Initialize user agent index
@@ -26,6 +30,17 @@ async def get_product_details(data: ASINRequest):
     result = await crawl_by_id(data.asin, user_agent_index)
 
     return result
+
+@app.head("/api/product")
+async def head_product_details(data: ASINRequest):
+    user_agent_index = 0  # Initialize user agent index
+
+    result = await crawl_by_id(data.asin, user_agent_index)
+
+    if 'error' in result:
+        raise HTTPException(status_code=404, detail="Product not found")
+
+    return
 
 async def crawl_by_id(id: str, user_agent_index: int):
     o = {}
